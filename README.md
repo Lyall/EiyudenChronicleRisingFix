@@ -10,7 +10,7 @@ This BepInEx plugin for the game Eiyuden Chronicle: Rising adds support for:
 
 ## Installation
 - Grab the latest release of EiyudenChronicleRisingFix from [here.](https://github.com/Lyall/EiyudenChronicleRisingFix/releases)
-- Extract the contents of the EiyudenChronicleRisingFix zip in to the game directory (e.g. steamapps/common/EiyudenChronicleRising).
+- Extract the contents of the release zip in to the game directory (e.g. steamapps/common/EiyudenChronicleRising).
 - Run the game once to generate a config file located at **EiyudenChronicleRising/BepinEx/config/EiyudenChronicleRisingFix.cfg**
 
 ## Configuration
