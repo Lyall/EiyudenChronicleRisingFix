@@ -52,9 +52,9 @@ namespace EiyudenChronicleRisingFix
                                "Set to true for no letterboxing during cutscenes.");
 
             SkipIntroLogos = Config.Bind("General",
-                   "SkipIntroLogos",
-                    true,
-                   "Set to true to skip the intro logos.");
+                                "SkipIntroLogos",
+                                true,
+                                "Set to true to skip the intro logos.");
 
             Harmony.CreateAndPatchAll(typeof(Patches));
         }
