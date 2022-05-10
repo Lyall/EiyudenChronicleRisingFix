@@ -5,5 +5,5 @@
 
 ## Configuration
 - See the generated config file to adjust various aspects of the plugin.
-- 
+
 More up to date [installation instructions are available here](https://github.com/Lyall/EiyudenChronicleRisingFix#installation).
