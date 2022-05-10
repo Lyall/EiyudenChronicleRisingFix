@@ -82,9 +82,10 @@ namespace EiyudenChronicleRisingFix
         [HarmonyPostfix]
         public static void SetScreenMatchMode(CanvasScaler __instance)
         {
-           
-            __instance.m_ScreenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-
+           if (ECRFix.CustomResolution.Value)
+            {
+                __instance.m_ScreenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+            }
         }
 
         // Disable cutscene letterboxing
