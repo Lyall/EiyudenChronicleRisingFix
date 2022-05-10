@@ -64,7 +64,6 @@ namespace EiyudenChronicleRisingFix
 
     [HarmonyPatch]
     public class Patches
-
     {
         // Set custom resolution
         [HarmonyPatch(typeof(GraphicSettings), "ApplyModifications")]
