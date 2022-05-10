@@ -20,7 +20,8 @@ This BepInEx plugin for the game Eiyuden Chronicle: Rising adds support for:
 Please report any issues you see and I'll do my best to fix them.
 
 ## Screenshots
-
+![ezgif-2-1a93ca8079](https://user-images.githubusercontent.com/695941/167739391-e9647537-6037-4520-acd3-2d291996db9d.gif)
+![ezgif-2-0ea3476425](https://user-images.githubusercontent.com/695941/167739497-bcb30d17-5931-4af3-9619-2c53e8ed345f.gif)
 
 ## Credits
 - [BepinEx](https://github.com/BepInEx/BepInEx) is licensed under the GNU Lesser General Public License v2.1.
