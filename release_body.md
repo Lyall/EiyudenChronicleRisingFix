@@ -1,5 +1,5 @@
 ## Installation
-- Extract the contents of the release zip in to the game directory (e.g. steamapps/common/EiyudenChronicleRising).
+- Extract the contents of the release zip in to the game directory.<br />(e.g. "**steamapps\common\Eiyuden Chronicle Rising**" for Steam or "**..\Eiyuden Chronicle- Rising\Content**" for MS/Gamepass).
 - Run the game once to generate a config file located at **GameDirectory/BepinEx/config/EiyudenChronicleRisingFix.cfg**
 
 ## Configuration
