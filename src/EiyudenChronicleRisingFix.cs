@@ -2,6 +2,9 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -56,25 +59,37 @@ namespace EiyudenChronicleRisingFix
                                 true,
                                 "Set to true to skip the intro logos.");
 
-            Harmony.CreateAndPatchAll(typeof(Patches));
-        }
+            if (CustomResolution.Value)
+            {
+                Harmony.CreateAndPatchAll(typeof(UltrawidePatches));
+            }
 
+            if (Letterboxing.Value)
+            {
+                Harmony.CreateAndPatchAll(typeof(LetterboxPatch));
+            }
+
+            if (SkipIntroLogos.Value)
+            {
+                Harmony.CreateAndPatchAll(typeof(SkipIntroPatch));
+            }
+        }
     }
 
-
     [HarmonyPatch]
-    public class Patches
+    public class UltrawidePatches
     {
+        public static float DefaultAspectRatio = (float)1920 / 1080;
+        public static float NewAspectRatio = ECRFix.DesiredResolutionX.Value / ECRFix.DesiredResolutionY.Value;
+        public static float AspectMultiplier = NewAspectRatio / DefaultAspectRatio;
+
         // Set custom resolution
         [HarmonyPatch(typeof(GraphicSettings), "ApplyModifications")]
         [HarmonyPostfix]
         public static void FixRes()
         {
-            if (ECRFix.CustomResolution.Value)
-            {
-                Screen.SetResolution((int)ECRFix.DesiredResolutionX.Value, (int)ECRFix.DesiredResolutionY.Value, (bool)ECRFix.Fullscreen.Value);
-                ECRFix.Log.LogInfo($"Changed resolution to {(int)ECRFix.DesiredResolutionX.Value} x {(int)ECRFix.DesiredResolutionY.Value}. Fullscreen = {(bool)ECRFix.Fullscreen.Value} ");
-            }   
+            Screen.SetResolution((int)ECRFix.DesiredResolutionX.Value, (int)ECRFix.DesiredResolutionY.Value, (bool)ECRFix.Fullscreen.Value);
+            ECRFix.Log.LogInfo($"Changed resolution to {(int)ECRFix.DesiredResolutionX.Value} x {(int)ECRFix.DesiredResolutionY.Value}. Fullscreen = {(bool)ECRFix.Fullscreen.Value} ");
         }
 
         // Set screen match mode when object has canvasscaler enabled
@@ -82,38 +97,63 @@ namespace EiyudenChronicleRisingFix
         [HarmonyPostfix]
         public static void SetScreenMatchMode(CanvasScaler __instance)
         {
-           if (ECRFix.CustomResolution.Value)
-            {
-                __instance.m_ScreenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-            }
+            __instance.m_ScreenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
         }
 
+        // Set SysBase screen width
+        // Can't access it traditionally as it is a static constructor
+        [HarmonyPatch(typeof(SysBase), "Start")]
+        [HarmonyPostfix]
+        public static void SetScreenWdith(SysBase __instance)
+        {
+            SysBase.SCR_W = (int)(AspectMultiplier * 1920);
+        }
+
+        // Fix horizontal position of many UI elements.
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(EventIcon), "DrawPos")]
+        [HarmonyPatch(typeof(GateIcon), "DrawPos")]
+        [HarmonyPatch(typeof(IconMat), "DrawPos")]
+        [HarmonyPatch(typeof(IconQst), "DrawPos")]
+        [HarmonyPatch(typeof(TalkIcon), "DrawPos")]
+        [HarmonyPatch(typeof(TalkPlay), "_view_pos", new Type[] { typeof(Vector3), typeof(Vector3) })]
+        public static IEnumerable<CodeInstruction> FixDrawPos(IEnumerable<CodeInstruction> instructions)
+        {
+            return new CodeMatcher(instructions)
+                      .MatchForward(true,
+                                    new CodeMatch(i => i.opcode == OpCodes.Ldc_R4 && ((float)i.operand == 1920))
+                                    )
+                      .SetOperandAndAdvance(1920 * AspectMultiplier)
+                      .InstructionEnumeration();
+        }
+    }
+
+    public class LetterboxPatch
+    {
         // Disable cutscene letterboxing
         [HarmonyPatch(typeof(TalkPlay), "mask_in")]
         [HarmonyPostfix]
         public static void FixLetterboxing(TalkPlay __instance)
         {
-            if (ECRFix.Letterboxing.Value)
-            {
-                __instance.m_mask._disp_off();
-                __instance.m_mask._disp_enable(false);
-                ECRFix.Log.LogInfo($"Disabled cutscene letterboxing.");
-            } 
+            __instance.m_mask._disp_off();
+            __instance.m_mask._disp_enable(false);
+            ECRFix.Log.LogInfo($"Disabled cutscene letterboxing.");
         }
+    }
 
+    public class SkipIntroPatch
+    {
         // Skip intro logos
         [HarmonyPatch(typeof(MenuLogo), "step_start")]
         [HarmonyPrefix]
         public static void SkipLogos(MenuLogo __instance)
         {
-            if (ECRFix.SkipIntroLogos.Value)
-            {
-                __instance.m_logo._off(4);
-                __instance.m_logo._off(0);
-                __instance.m_drv = 0;
-                __instance._step0(0, false);
-                return;
-            } 
+            __instance.m_logo._off(4);
+            __instance.m_logo._off(0);
+            __instance.m_drv = 0;
+            __instance._step0(0, false);
+            ECRFix.Log.LogInfo($"Intro logos skipped.");
+            return;
         }
     }
 }
